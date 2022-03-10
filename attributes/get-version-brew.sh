@@ -2,9 +2,8 @@
 
 ### region ############################################ DOCBLOCK
 #
-# Gets the installed version of the ffmpeg binary
+# Gets the installed version of Homebrew
 #
-# @see    https://ffmpeg.org/
 # @author Aaron J <aaronj@econoprint.com>
 #
 ### endregion ######################################### DockBlock
@@ -13,11 +12,11 @@
 
 # Begin Customization
 DEFAULT="None"
-BINARY_NAME="ffmpeg"
-VERSION_FLAG="-version" # Include single or double dashes as applicable
+BINARY_NAME="brew"
+VERSION_FLAG="-v" # Include single or double dashes as applicable
 VERSION_GREP="" # Cuts to only the lines that include this result
 VERSION_LINE="1" # Only includes the given line number
-VERSION_COLUMN="3" # Cuts to this space delimited column of the results
+VERSION_COLUMN="2" # Cuts to this space delimited column of the results
 VERSION_PIPE="" # Additional string manpulation.  Do not include leading pipe!!
 PATH_ADDITONS="/usr/local/bin:/opt/homebrew/bin:/opt/local/bin" # Common paths for homebrew and macports
 
@@ -25,8 +24,10 @@ PATH_ADDITONS="/usr/local/bin:/opt/homebrew/bin:/opt/local/bin" # Common paths f
 
 # Default the Version
 VERSION="$DEFAULT"
-# Determine where the binary is using, including paths from our additions
-BINARY_PATH=$(PATH="$PATH:$PATH_ADDITONS" && /usr/bin/which "$BINARY_NAME")
+# Append PATH_ADDITONS to the PATH environment variable for this script only
+PATH="$PATH:$PATH_ADDITONS"
+# Determine where the binary is
+BINARY_PATH=$(which "$BINARY_NAME")
 if [ -z "$BINARY_PATH" ]; then
   # Well, none of the existing paths nor our path additions worked.
   # Let's give one last effort using path_helper

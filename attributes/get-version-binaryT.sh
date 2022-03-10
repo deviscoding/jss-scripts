@@ -2,7 +2,7 @@
 
 ### region ############################################ DOCBLOCK
 #
-# Tests for version of a binary, as configured below.  Note that the BINARY_NAME, VERSION_FLAG, and VERSION_PIPE
+# Tests for version of a binary, as configured below.  Note that the BINARY_NAME and VERSION_FLAG
 # must be customized for each binary, and should be tested on the command line before implementing.
 #
 # @author Aaron J <aaronj@econoprint.com>
@@ -14,15 +14,28 @@
 # Begin Customization
 DEFAULT="None"
 BINARY_NAME=""
-VERSION_FLAG="" # Include single or double dashes as applicable
-VERSION_GREP="" # Cuts to only the lines that include this result
-VERSION_LINE="" # Only includes the given line number
-VERSION_COLUMN="" # Cuts to this space delimited column of the results
-VERSION_PIPE="" # Additional string manpulation.  Do not include leading pipe!!
+VERSION_FLAG="" # Required: Include single or double dashes as applicable
+VERSION_GREP="" # Optional: Cuts to only the lines that include this result
+VERSION_LINE="" # Optional: Only includes the given line number
+VERSION_COLUMN="" # Optional: Cuts to this space delimited column of the results
+VERSION_PIPE="" # Optional: Additional string manpulation.  Do not include leading pipe!!
+PATH_ADDITONS="/usr/local/bin:/opt/homebrew/bin:/opt/local/bin" # Common paths for homebrew and macports
 
-# End Customization
-BINARY_PATH=$(which "$BINARY_NAME")
+##### End Customization
+
+# Default the Version
 VERSION="$DEFAULT"
+# Determine where the binary is using, including paths from our additions
+BINARY_PATH=$(PATH="$PATH:$PATH_ADDITONS" && /usr/bin/which "$BINARY_NAME")
+if [ -z "$BINARY_PATH" ]; then
+  # Well, none of the existing paths nor our path additions worked.
+  # Let's give one last effort using path_helper
+  if [ -x /usr/libexec/path_helper ]; then
+    # shellcheck disable=SC2046
+    eval "$(/usr/libexec/path_helper -s)"
+    BINARY_PATH=$(which "$BINARY_NAME")
+  fi
+fi
 
 ### endregion ######################################### Variables
 
@@ -53,6 +66,7 @@ if [ -n "${BINARY_PATH}" ]; then
   fi
 
   # Remove Leading V
+  # shellcheck disable=SC2001
   VERSION=$(echo "$VERSION" | sed 's/^v//')
 
   # Test for Version
